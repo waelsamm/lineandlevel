@@ -1,6 +1,6 @@
 // File: src/LineAndLevel.jsx
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import logo from "./assets/logo.png";
 import plumbingImg from "./assets/plumbing.jpg";
 import hvacImg from "./assets/hvac.jpg";
@@ -18,18 +18,51 @@ import {
   Link,
   Stack,
   Grid,
-  Divider
+  Divider,
+  IconButton,
+  createTheme,
+  ThemeProvider,
+  useScrollTrigger,
+  CssBaseline
 } from "@mui/material";
 import { motion } from "framer-motion";
+import LightModeIcon from '@mui/icons-material/LightMode';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import '@fontsource-variable/raleway';
 
-const colors = {
+const baseColors = {
   primary: "#233746",
   accent: "#F4B400",
   background: "#FAF9F6",
   text: "#1C1C1C"
 };
 
+const darkColors = {
+  primary: "#1f2a36",
+  accent: "#FFC107",
+  background: "#121212",
+  paper: "#1e1e1e",
+  text: "#EDEDED"
+};
+
+function ElevationScroll(props) {
+  const { children } = props;
+  const trigger = useScrollTrigger({ disableHysteresis: true, threshold: 0 });
+
+  return React.cloneElement(children, {
+    elevation: trigger ? 4 : 0,
+    style: {
+      backgroundColor: trigger ? "rgba(35, 55, 70, 0.95)" : "transparent",
+      backdropFilter: "blur(10px)",
+      transition: "background-color 0.3s ease, backdrop-filter 0.3s ease"
+    }
+  });
+}
+
 export default function LineAndLevel() {
+  const [darkMode, setDarkMode] = useState(false);
+  const colors = darkMode ? darkColors : baseColors;
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -87,33 +120,70 @@ export default function LineAndLevel() {
     }
   ];
 
-  return (
-    <Box sx={{ bgcolor: colors.background, minHeight: "100vh", color: colors.text, fontFamily: "'Segoe UI', sans-serif" }}>
-      <AppBar position="sticky" sx={{ bgcolor: colors.primary }}>
-        <Toolbar>
-          <img src={logo} alt="Line & Level" style={{ height: 40, marginRight: 12 }} />
-          <Typography variant="h6" sx={{ flexGrow: 1 }}>
-            Line & Level Construction
-          </Typography>
-        </Toolbar>
-      </AppBar>
+  const theme = createTheme({
+    palette: {
+      mode: darkMode ? "dark" : "light",
+      background: {
+        default: colors.background,
+        paper: darkMode ? darkColors.paper : "#ffffff"
+      },
+      primary: {
+        main: colors.primary
+      },
+      text: {
+        primary: colors.text
+      }
+    },
+    typography: {
+      fontFamily: "Raleway Variable, sans-serif",
+      h3: {
+        textTransform: "uppercase",
+        letterSpacing: 2,
+        fontWeight: 800
+      },
+      h4: {
+        fontWeight: 700,
+        textTransform: "uppercase",
+        letterSpacing: 1.5
+      },
+      button: {
+        textTransform: "uppercase",
+        fontWeight: 600
+      },
+      body1: {
+        fontFamily: "Raleway Variable, sans-serif"
+      },
+      body2: {
+        fontFamily: "Raleway Variable, sans-serif"
+      }
+    }
+  });
 
-      <Box
-        sx={{
-          height: "60vh",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          textAlign: "center",
-          background: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url(${remodelingImg}) center/cover no-repeat`,
-          color: "white"
-        }}
-      >
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <ElevationScroll>
+        <AppBar position="fixed" color="transparent" sx={{ transition: "all 0.3s ease", boxShadow: "none" }}>
+          <Toolbar sx={{ justifyContent: "space-between" }}>
+            <Stack direction="row" alignItems="center" spacing={1} sx={{ transition: "all 0.3s ease", '&:hover': { transform: "translateY(-2px)", textShadow: "0 2px 4px rgba(0,0,0,0.3)" } }}>
+              <Box component="img" src={logo} alt="Line & Level Logo" sx={{ height: 50, width: 50, borderRadius: "50%", bgcolor: "#fff", p: 0.5 }} />
+              <Typography variant="h6" fontWeight={700} letterSpacing={1} sx={{ color: colors.text }}>
+                Line & Level Construction
+              </Typography>
+            </Stack>
+            <IconButton onClick={() => setDarkMode(!darkMode)} color="inherit">
+              {darkMode ? <LightModeIcon /> : <DarkModeIcon />}
+            </IconButton>
+          </Toolbar>
+        </AppBar>
+      </ElevationScroll>
+
+      <Box sx={{ height: "60vh", display: "flex", justifyContent: "center", alignItems: "center", textAlign: "center", background: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url(${remodelingImg}) center/cover no-repeat`, color: "white", mt: 8 }}>
         <Box>
-          <Typography variant="h3" fontWeight="bold" gutterBottom>
+          <Typography variant="h3" gutterBottom>
             Building Trust, One Project at a Time
           </Typography>
-          <Typography variant="h6">20+ Years of Craftsmanship in Dearborn and Beyond</Typography>
+          <Typography variant="h6">20+ Years of Craftsmanship in Metro Detroit and Beyond</Typography>
         </Box>
       </Box>
 
@@ -136,7 +206,7 @@ export default function LineAndLevel() {
             20 Years of Reliable, Trustworthy Construction Service
           </Typography>
           <Typography variant="body1" align="center">
-            Based in Dearborn, Line & Level Construction brings experience, skill, and pride to every job — big or small. Our clients count on us for honest pricing, skilled labor, and high-quality results, whether it's a family home remodel or a large commercial project.
+            Based in Metro Detroit, Line & Level Construction brings experience, skill, and pride to every job — big or small. Our clients count on us for honest pricing, skilled labor, and high-quality results, whether it's a family home remodel or a large commercial project.
           </Typography>
         </Box>
 
@@ -154,24 +224,21 @@ export default function LineAndLevel() {
                   borderRadius: 16,
                   overflow: "hidden",
                   boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-                  backgroundColor: "#fff",
+                  backgroundColor: theme.palette.background.paper,
                   display: "flex",
                   flexDirection: "column",
-                  height: "100%"
+                  height: "100%",
+                  minHeight: 400
                 }}
               >
-                <Box sx={{ height: 200, overflow: "hidden" }}>
+                <Box sx={{ height: 200, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <img
                     src={service.image}
                     alt={service.title}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover"
-                    }}
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
                   />
                 </Box>
-                <Box sx={{ p: 2, textAlign: "center" }}>
+                <Box sx={{ flex: 1, p: 2, textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "center" }}>
                   <Typography variant="h6" fontWeight="bold" gutterBottom>
                     {service.title}
                   </Typography>
@@ -193,7 +260,7 @@ export default function LineAndLevel() {
           <Typography variant="subtitle1" align="center" sx={{ mb: 2 }}>
             Business Owner: <strong>Sam Charara</strong> | Phone: <strong>313-790-0666</strong>
           </Typography>
-          <Paper elevation={3} sx={{ p: 4, maxWidth: 600, mx: "auto", bgcolor: "#ffffff" }}>
+          <Paper elevation={3} sx={{ p: 4, maxWidth: 600, mx: "auto", bgcolor: theme.palette.background.paper }}>
             <motion.form
               onSubmit={handleSubmit}
               initial={{ opacity: 0, y: 40 }}
@@ -224,9 +291,30 @@ export default function LineAndLevel() {
         </Box>
       </Container>
 
+      <Button
+        href="tel:3137900666"
+        variant="contained"
+        startIcon={<span role="img" aria-label="phone">📞</span>}
+        sx={{
+          position: "fixed",
+          bottom: 20,
+          right: 20,
+          bgcolor: colors.accent,
+          color: colors.primary,
+          boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+          '&:hover': {
+            transform: "scale(1.1)",
+            bgcolor: "#e0a800"
+          },
+          zIndex: 1300
+        }}
+      >
+        Call Now
+      </Button>
+
       <Box sx={{ bgcolor: colors.primary, color: "white", py: 3, textAlign: "center", mt: 5 }}>
         &copy; 2025 Line & Level Construction. All rights reserved.
       </Box>
-    </Box>
+    </ThemeProvider>
   );
 }
