@@ -1,6 +1,6 @@
 // File: src/LineAndLevel.jsx
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import logo from "./assets/logo.png";
 import plumbingImg from "./assets/plumbing.jpg";
 import hvacImg from "./assets/hvac.jpg";
